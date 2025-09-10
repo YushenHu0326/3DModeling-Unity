@@ -18,16 +18,18 @@ public class DebugController : MonoBehaviour
 
     IEnumerator AddPointCloud()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f);/*
         if (grid)
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 1; i++)
             {
                 pointCloud.AddPoint(new Vector3(Random.Range(0, grid.canvasSize), Random.Range(0, grid.canvasSize), Random.Range(0, grid.canvasSize)));
                 grid.UpdatePointCloud(pointCloud);
-                yield return new WaitForSeconds(0.02f);
+                yield return new WaitForSeconds(0.01f);
             }
-        }
+        }*/
+
+        grid.UpdateMesh();
     }
 
     // Update is called once per frame
