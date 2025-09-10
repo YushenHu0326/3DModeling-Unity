@@ -38,6 +38,8 @@ public class CanvasGrid : MonoBehaviour
 
     public int grid = 10;
 
+    public float maxVal = 1f;
+
     float gridSize;
 
     public List<GridInfo> gridInfos;
@@ -51,7 +53,7 @@ public class CanvasGrid : MonoBehaviour
     List<Cube> cubes;
 
     MeshFilter filter;
-    MeshRenderer renderer;
+    MeshRenderer meshRenderer;
     Mesh mesh;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -64,8 +66,8 @@ public class CanvasGrid : MonoBehaviour
         filter = gameObject.GetComponent<MeshFilter>();
         if (filter == null) filter = gameObject.AddComponent<MeshFilter>();
 
-        renderer = gameObject.GetComponent<MeshRenderer>();
-        if (renderer == null) renderer = gameObject.AddComponent<MeshRenderer>();
+        meshRenderer = gameObject.GetComponent<MeshRenderer>();
+        if (meshRenderer == null) meshRenderer = gameObject.AddComponent<MeshRenderer>();
 
         Vector3[] newVertices = new Vector3[0];
         Vector2[] newUVs = new Vector2[0];
@@ -119,7 +121,13 @@ public class CanvasGrid : MonoBehaviour
             }
         }
 
-        gridInfos[13].val = 0.2f;
+        /*gridInfos[500].val = 1f;
+        gridInfos[501].val = 0.8f;
+        gridInfos[502].val = 0.6f;
+        gridInfos[503].val = 0.4f;
+        gridInfos[504].val = 0.2f;
+        gridInfos[505].val = 1f;
+        gridInfos[506].val = 1f;*/
     }
 
     void InitCube()
@@ -200,8 +208,8 @@ public class CanvasGrid : MonoBehaviour
             List<Triangle> t2 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z1, cube.x2y2z1, cube.x2y2z2);
             List<Triangle> t3 = MarchingTetrahedra(cube.x1y1z1, cube.x2y2z1, cube.x1y2z1, cube.x2y2z2);
             List<Triangle> t4 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z1, cube.x1y2z2, cube.x2y2z2);
-            List<Triangle> t5 = MarchingTetrahedra(cube.x1y1z1, cube.x1y1z2, cube.x1y2z2, cube.x2y2z2);
-            List<Triangle> t6 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z2, cube.x1y1z2, cube.x2y2z2);
+            List<Triangle> t5 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z2, cube.x1y1z2, cube.x2y2z2);
+            List<Triangle> t6 = MarchingTetrahedra(cube.x1y1z1, cube.x1y1z2, cube.x2y1z2, cube.x2y2z2);
 
             t1.AddRange(t2);
             t1.AddRange(t3);
@@ -237,76 +245,176 @@ public class CanvasGrid : MonoBehaviour
         if (x.val == 0f && y.val * z.val * w.val != 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val, 0f, gridSize);
-            triangle.b = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val, 0f, gridSize);
-            triangle.c = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val, 0f, gridSize);
+            triangle.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (x.val != 0f && y.val + z.val + w.val == 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val, 0f, gridSize);
-            triangle.b = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val, 0f, gridSize);
-            triangle.c = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val, 0f, gridSize);
+            triangle.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (y.val == 0f && x.val * z.val * w.val != 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val, 0f, gridSize);
-            triangle.b = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(y.val, 0f, gridSize);
-            triangle.c = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val, 0f, gridSize);
+            triangle.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (y.val != 0f && x.val + z.val + w.val == 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val, 0f, gridSize);
-            triangle.b = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val, 0f, gridSize);
-            triangle.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val, 0f, gridSize);
+            triangle.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (z.val == 0f && y.val * x.val * w.val != 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val, 0f, gridSize);
-            triangle.b = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val, 0f, gridSize);
-            triangle.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val, 0f, gridSize);
+            triangle.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (z.val != 0f && y.val + x.val + w.val == 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val, 0f, gridSize);
-            triangle.b = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val, 0f, gridSize);
-            triangle.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val, 0f, gridSize);
+            triangle.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (w.val == 0f && y.val * z.val * x.val != 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val, 0f, gridSize);
-            triangle.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val, 0f, gridSize);
-            triangle.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val, 0f, gridSize);
+            triangle.a = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
         if (w.val != 0f && y.val + z.val + x.val == 0f)
         {
             Triangle triangle = new Triangle();
-            triangle.a = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val, 0f, gridSize);
-            triangle.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val, 0f, gridSize);
-            triangle.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val, 0f, gridSize);
+            triangle.a = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangles.Add(triangle);
         }
 
-        //if (x.val + y.val == 0 && z.)
+        if (x.val + y.val == 0 && z.val * w.val != 0f)
+        {
+            Triangle triangle1 = new Triangle();
+            Triangle triangle2 = new Triangle();
+
+            triangle1.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.b = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.c = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangle2.a = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.c = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangles.Add(triangle1);
+            triangles.Add(triangle2);
+        }
+
+        if (x.val * y.val != 0 && z.val + w.val == 0f)
+        {
+            Triangle triangle1 = new Triangle();
+            Triangle triangle2 = new Triangle();
+
+            triangle1.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.b = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangle2.a = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.c = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangles.Add(triangle1);
+            triangles.Add(triangle2);
+        }
+
+        if (x.val + z.val == 0 && y.val * w.val != 0f)
+        {
+            Triangle triangle1 = new Triangle();
+            Triangle triangle2 = new Triangle();
+
+            triangle1.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.b = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangle2.a = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.b = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.c = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangles.Add(triangle1);
+            triangles.Add(triangle2);
+        }
+
+        if (x.val * z.val != 0 && y.val + w.val == 0f)
+        {
+            Triangle triangle1 = new Triangle();
+            Triangle triangle2 = new Triangle();
+
+            triangle1.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.b = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangle2.a = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.b = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.c = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangles.Add(triangle1);
+            triangles.Add(triangle2);
+        }
+
+        if (x.val + w.val == 0 && z.val * y.val != 0f)
+        {
+            Triangle triangle1 = new Triangle();
+            Triangle triangle2 = new Triangle();
+
+            triangle1.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.b = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangle2.a = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.c = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangles.Add(triangle1);
+            triangles.Add(triangle2);
+        }
+
+        if (x.val * w.val != 0 && z.val + y.val == 0f)
+        {
+            Triangle triangle1 = new Triangle();
+            Triangle triangle2 = new Triangle();
+
+            triangle1.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.b = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangle2.a = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.c = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+
+            triangles.Add(triangle1);
+            triangles.Add(triangle2);
+        }
 
         return triangles;
     }
