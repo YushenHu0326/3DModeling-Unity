@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class CanvasGrid : MonoBehaviour
 {
+    // the class that stores information for each vertex on a grid
     public class GridInfo
     {
         public int x;
@@ -11,10 +12,9 @@ public class CanvasGrid : MonoBehaviour
         public int z;
         public Vector3 position;
         public float val;
-
-        public GridVisualizer visualizer;
     }
 
+    // the cube that will be used to compute the actual mesh, consists of 8 vertices from the grid
     public class Cube
     {
         public GridInfo x1y1z1;
@@ -27,6 +27,28 @@ public class CanvasGrid : MonoBehaviour
         public GridInfo x2y2z2;
     }
 
+    // the struct of cube but for GPU computing
+    public struct CubeGPU
+    {
+        public Vector3 x1y1z1;
+        public Vector3 x2y1z1;
+        public Vector3 x1y2z1;
+        public Vector3 x2y2z1;
+        public Vector3 x1y1z2;
+        public Vector3 x2y1z2;
+        public Vector3 x1y2z2;
+        public Vector3 x2y2z2;
+
+        public float x1y1z1Val;
+        public float x2y1z1Val;
+        public float x1y2z1Val;
+        public float x2y2z1Val;
+        public float x1y1z2Val;
+        public float x2y1z2Val;
+        public float x1y2z2Val;
+        public float x2y2z2Val;
+    }
+
     public class Triangle
     {
         public Vector3 a;
@@ -35,27 +57,28 @@ public class CanvasGrid : MonoBehaviour
         public Vector3 n;
     }
 
+    // the size of the grid canvas
     public float canvasSize = 100f;
 
+    // the number of division
     public int grid = 10;
 
+    // the maximum value stored on each vertex
     public float maxVal = 1f;
 
+    // grid/cell size computed on start
     float gridSize;
 
     public List<GridInfo> gridInfos;
 
-    public bool useVisualizer = true;
-
-    public GameObject visualizerPrefab;
-
-    public List<GridVisualizer> visualizers;
-
-    List<Cube> cubes;
+    Cube[] cubes;
+    CubeGPU[] cubeGPUs;
 
     MeshFilter filter;
     MeshRenderer meshRenderer;
     Mesh mesh;
+
+    public ComputeShader marchingTetrahedraShader;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -109,14 +132,6 @@ public class CanvasGrid : MonoBehaviour
                     info.position = new Vector3(gridSize * (float)x, gridSize * (float)y, gridSize * (float)z);
                     info.val = 0f;
 
-                    if (useVisualizer)
-                    {
-                        GridVisualizer visualizer = Instantiate(visualizerPrefab).GetComponent<GridVisualizer>();
-                        info.visualizer = visualizer;
-                        visualizer.gameObject.transform.position = info.position;
-                        visualizer.UpdateVisualizer(info.val);
-                    }
-
                     gridInfos.Add(info);
                 }
             }
@@ -133,7 +148,7 @@ public class CanvasGrid : MonoBehaviour
 
     void InitCube()
     {
-        cubes = new List<Cube>();
+        cubes = new Cube[grid * grid * grid];
 
         for (int x = 0; x < grid; x++)
         {
@@ -151,7 +166,7 @@ public class CanvasGrid : MonoBehaviour
                     cube.x1y2z2 = FindGrid(x, y + 1, z + 1);
                     cube.x2y2z2 = FindGrid(x + 1, y + 1, z + 1);
 
-                    cubes.Add(cube);
+                    cubes[z + grid * y + grid * grid * x] = cube;
                 }
             }
         }
@@ -179,14 +194,6 @@ public class CanvasGrid : MonoBehaviour
                 cube.x2y2z2.val += Mathf.Max(gridSize - Vector3.Distance(cube.x2y2z2.position, relPos), 0f) * pointCloud.val;
             }
         }
-
-        if (useVisualizer)
-        {
-            foreach (GridInfo info in gridInfos)
-            {
-                info.visualizer.UpdateVisualizer(info.val);
-            }
-        }
     }
 
     public void UpdateMesh()
@@ -202,7 +209,9 @@ public class CanvasGrid : MonoBehaviour
 
         int verticesCount = 0;
 
-        for (int i = 0; i < cubes.Count; i++)
+        //ComputeBuffer cubeBuffer = new ComputeBuffer()
+
+        for (int i = 0; i < cubes.Length; i++)
         {
             Cube cube = cubes[i];
             List<Triangle> t1 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z2, cube.x2y1z1, cube.x2y2z2);

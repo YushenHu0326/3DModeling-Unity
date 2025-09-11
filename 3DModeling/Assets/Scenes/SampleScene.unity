@@ -506,9 +506,7 @@ MonoBehaviour:
   canvasSize: 1
   grid: 12
   maxVal: 1
-  useVisualizer: 0
-  visualizerPrefab: {fileID: 1341289402365341064, guid: 9a0488a3344de7f419159cac2df29d2e, type: 3}
-  visualizers: []
+  marchingTetrahedraShader: {fileID: 7200000, guid: 2f0f4b0f1b0d5914d88e10153a5a6c1c, type: 3}
 --- !u!4 &993859533
 Transform:
   m_ObjectHideFlags: 0
