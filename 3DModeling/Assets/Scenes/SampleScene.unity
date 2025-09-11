@@ -504,7 +504,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvasSize: 1
-  grid: 10
+  grid: 12
+  maxVal: 1
   useVisualizer: 0
   visualizerPrefab: {fileID: 1341289402365341064, guid: 9a0488a3344de7f419159cac2df29d2e, type: 3}
   visualizers: []

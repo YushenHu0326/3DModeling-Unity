@@ -32,6 +32,7 @@ public class CanvasGrid : MonoBehaviour
         public Vector3 a;
         public Vector3 b;
         public Vector3 c;
+        public Vector3 n;
     }
 
     public float canvasSize = 100f;
@@ -121,13 +122,13 @@ public class CanvasGrid : MonoBehaviour
             }
         }
 
-        /*gridInfos[500].val = 1f;
-        gridInfos[501].val = 0.8f;
-        gridInfos[502].val = 0.6f;
-        gridInfos[503].val = 0.4f;
-        gridInfos[504].val = 0.2f;
-        gridInfos[505].val = 1f;
-        gridInfos[506].val = 1f;*/
+        foreach (GridInfo info in gridInfos)
+        {
+            if (info.x > 2 && info.x < 8)
+                if (info.y > 2 && info.y < 8)
+                    if (info.z > 2 && info.z < 8)
+                        info.val = 1f;
+        }
     }
 
     void InitCube()
@@ -224,9 +225,21 @@ public class CanvasGrid : MonoBehaviour
                     vertices.Add(t.a);
                     vertices.Add(t.b);
                     vertices.Add(t.c);
-                    triangles.Add(verticesCount);
-                    triangles.Add(verticesCount + 1);
-                    triangles.Add(verticesCount + 2);
+
+                    Vector3 n = Vector3.Cross(t.b - t.a, t.c - t.a);
+                    if (Vector3.Dot(n, t.n) > 0)
+                    {
+                        triangles.Add(verticesCount);
+                        triangles.Add(verticesCount + 1);
+                        triangles.Add(verticesCount + 2);
+                    }
+                    else
+                    {
+                        triangles.Add(verticesCount);
+                        triangles.Add(verticesCount + 2);
+                        triangles.Add(verticesCount + 1);
+                    }
+
                     verticesCount += 3;
                 }
             }
@@ -248,6 +261,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = x.position - y.position;
             triangles.Add(triangle);
         }
 
@@ -257,6 +271,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = y.position - x.position;
             triangles.Add(triangle);
         }
 
@@ -266,6 +281,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = y.position - x.position;
             triangles.Add(triangle);
         }
 
@@ -275,6 +291,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = x.position - y.position;
             triangles.Add(triangle);
         }
 
@@ -284,6 +301,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = z.position - y.position;
             triangles.Add(triangle);
         }
 
@@ -293,6 +311,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = y.position - z.position;
             triangles.Add(triangle);
         }
 
@@ -302,6 +321,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = w.position - y.position;
             triangles.Add(triangle);
         }
 
@@ -311,6 +331,7 @@ public class CanvasGrid : MonoBehaviour
             triangle.a = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle.n = y.position - w.position;
             triangles.Add(triangle);
         }
 
@@ -322,10 +343,12 @@ public class CanvasGrid : MonoBehaviour
             triangle1.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.b = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.c = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.n = x.position - z.position;
 
             triangle2.a = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.c = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.n = x.position - z.position;
 
             triangles.Add(triangle1);
             triangles.Add(triangle2);
@@ -339,10 +362,12 @@ public class CanvasGrid : MonoBehaviour
             triangle1.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.b = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.n = z.position - x.position;
 
             triangle2.a = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.c = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.n = z.position - x.position;
 
             triangles.Add(triangle1);
             triangles.Add(triangle2);
@@ -356,10 +381,12 @@ public class CanvasGrid : MonoBehaviour
             triangle1.a = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.b = w.position + Vector3.Normalize(x.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.n = x.position - y.position;
 
             triangle2.a = y.position + Vector3.Normalize(z.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.b = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.c = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.n = x.position - y.position;
 
             triangles.Add(triangle1);
             triangles.Add(triangle2);
@@ -373,10 +400,12 @@ public class CanvasGrid : MonoBehaviour
             triangle1.a = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.b = x.position + Vector3.Normalize(w.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.c = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.n = y.position - x.position;
 
             triangle2.a = z.position + Vector3.Normalize(y.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.b = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.c = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.n = y.position - x.position;
 
             triangles.Add(triangle1);
             triangles.Add(triangle2);
@@ -390,10 +419,12 @@ public class CanvasGrid : MonoBehaviour
             triangle1.a = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.b = y.position + Vector3.Normalize(x.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.c = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.n = x.position - z.position;
 
             triangle2.a = z.position + Vector3.Normalize(w.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.b = y.position + Vector3.Normalize(w.position - y.position) * Mathf.Clamp(y.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.c = z.position + Vector3.Normalize(x.position - z.position) * Mathf.Clamp(z.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.n = x.position - z.position;
 
             triangles.Add(triangle1);
             triangles.Add(triangle2);
@@ -407,10 +438,12 @@ public class CanvasGrid : MonoBehaviour
             triangle1.a = x.position + Vector3.Normalize(z.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.b = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle1.c = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle1.n = z.position - x.position;
 
             triangle2.a = w.position + Vector3.Normalize(z.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.b = w.position + Vector3.Normalize(y.position - w.position) * Mathf.Clamp(w.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
             triangle2.c = x.position + Vector3.Normalize(y.position - x.position) * Mathf.Clamp(x.val / maxVal * gridSize / 2f, 0f, gridSize / 2f);
+            triangle2.n = z.position - x.position;
 
             triangles.Add(triangle1);
             triangles.Add(triangle2);
@@ -419,8 +452,14 @@ public class CanvasGrid : MonoBehaviour
         return triangles;
     }
 
+    public void SetGrid(int x, int y, int z, float val)
+    {
+        GridInfo gridInfo = FindGrid(x, y, z);
+        if (gridInfo != null) gridInfo.val = val;
+    }
+
     // Helper function to locate a grid vertex
-    GridInfo FindGrid(int x, int y, int z)
+    public GridInfo FindGrid(int x, int y, int z)
     {
         foreach (GridInfo gridInfo in gridInfos)
         {
