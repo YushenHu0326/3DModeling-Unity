@@ -22,8 +22,6 @@ struct Tetrahedra
     float3 t2b;
     float3 t2c;
     float3 t2n;
-
-    int a;
 };
 
 RWStructuredBuffer<Tetrahedra> tetras;

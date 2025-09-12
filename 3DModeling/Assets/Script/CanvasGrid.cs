@@ -49,8 +49,6 @@ public class CanvasGrid : MonoBehaviour
         public Vector3 t2b;
         public Vector3 t2c;
         public Vector3 t2n;
-
-        public int a;
     }
 
     public class Triangle
@@ -284,7 +282,7 @@ public class CanvasGrid : MonoBehaviour
 
         if (useGPU)
         {
-            ComputeBuffer tetraBuffer = new ComputeBuffer(tetras.Length, sizeof(float) * 40 + sizeof(int));
+            ComputeBuffer tetraBuffer = new ComputeBuffer(tetras.Length, sizeof(float) * 40);
             tetraBuffer.SetData(tetras);
             marchingTetrahedraShader.SetBuffer(0, "tetras", tetraBuffer);
             marchingTetrahedraShader.SetFloat("maxVal", maxVal);
