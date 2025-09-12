@@ -15,7 +15,7 @@ public class CanvasGrid : MonoBehaviour
     }
 
     // the cube that will be used to compute the actual mesh, consists of 8 vertices from the grid
-    public class Cube
+    public struct Cube
     {
         public GridInfo x1y1z1;
         public GridInfo x2y1z1;
@@ -28,25 +28,29 @@ public class CanvasGrid : MonoBehaviour
     }
 
     // the struct of cube but for GPU computing
-    public struct CubeGPU
+    public struct Tetrahedra
     {
-        public Vector3 x1y1z1;
-        public Vector3 x2y1z1;
-        public Vector3 x1y2z1;
-        public Vector3 x2y2z1;
-        public Vector3 x1y1z2;
-        public Vector3 x2y1z2;
-        public Vector3 x1y2z2;
-        public Vector3 x2y2z2;
+        public Vector3 x;
+        public Vector3 y;
+        public Vector3 z;
+        public Vector3 w;
 
-        public float x1y1z1Val;
-        public float x2y1z1Val;
-        public float x1y2z1Val;
-        public float x2y2z1Val;
-        public float x1y1z2Val;
-        public float x2y1z2Val;
-        public float x1y2z2Val;
-        public float x2y2z2Val;
+        public float xVal;
+        public float yVal;
+        public float zVal;
+        public float wVal;
+
+        public Vector3 t1a;
+        public Vector3 t1b;
+        public Vector3 t1c;
+        public Vector3 t1n;
+
+        public Vector3 t2a;
+        public Vector3 t2b;
+        public Vector3 t2c;
+        public Vector3 t2n;
+
+        public int a;
     }
 
     public class Triangle
@@ -69,10 +73,12 @@ public class CanvasGrid : MonoBehaviour
     // grid/cell size computed on start
     float gridSize;
 
+    public bool useGPU;
+
     public List<GridInfo> gridInfos;
 
     Cube[] cubes;
-    CubeGPU[] cubeGPUs;
+    Tetrahedra[] tetras;
 
     MeshFilter filter;
     MeshRenderer meshRenderer;
@@ -149,6 +155,7 @@ public class CanvasGrid : MonoBehaviour
     void InitCube()
     {
         cubes = new Cube[grid * grid * grid];
+        tetras = new Tetrahedra[grid * grid * grid * 6];
 
         for (int x = 0; x < grid; x++)
         {
@@ -167,6 +174,72 @@ public class CanvasGrid : MonoBehaviour
                     cube.x2y2z2 = FindGrid(x + 1, y + 1, z + 1);
 
                     cubes[z + grid * y + grid * grid * x] = cube;
+
+                    Tetrahedra tetra1 = new Tetrahedra();
+                    tetra1.x = cube.x1y1z1.position;
+                    tetra1.y = cube.x2y1z2.position;
+                    tetra1.z = cube.x2y1z1.position;
+                    tetra1.w = cube.x2y2z2.position;
+                    tetra1.xVal = cube.x1y1z1.val;
+                    tetra1.yVal = cube.x2y1z2.val;
+                    tetra1.zVal = cube.x2y1z1.val;
+                    tetra1.wVal = cube.x2y2z2.val;
+                    tetras[(z + grid * y + grid * grid * x) * 6] = tetra1;
+
+                    Tetrahedra tetra2 = new Tetrahedra();
+                    tetra2.x = cube.x1y1z1.position;
+                    tetra2.y = cube.x2y1z1.position;
+                    tetra2.z = cube.x2y2z1.position;
+                    tetra2.w = cube.x2y2z2.position;
+                    tetra2.xVal = cube.x1y1z1.val;
+                    tetra2.yVal = cube.x2y1z1.val;
+                    tetra2.zVal = cube.x2y2z1.val;
+                    tetra2.wVal = cube.x2y2z2.val;
+                    tetras[(z + grid * y + grid * grid * x) * 6 + 1] = tetra2;
+
+                    Tetrahedra tetra3 = new Tetrahedra();
+                    tetra3.x = cube.x1y1z1.position;
+                    tetra3.y = cube.x2y2z1.position;
+                    tetra3.z = cube.x1y2z1.position;
+                    tetra3.w = cube.x2y2z2.position;
+                    tetra3.xVal = cube.x1y1z1.val;
+                    tetra3.yVal = cube.x2y2z1.val;
+                    tetra3.zVal = cube.x1y2z1.val;
+                    tetra3.wVal = cube.x2y2z2.val;
+                    tetras[(z + grid * y + grid * grid * x) * 6 + 2] = tetra3;
+
+                    Tetrahedra tetra4 = new Tetrahedra();
+                    tetra4.x = cube.x1y1z1.position;
+                    tetra4.y = cube.x1y2z1.position;
+                    tetra4.z = cube.x1y2z2.position;
+                    tetra4.w = cube.x2y2z2.position;
+                    tetra4.xVal = cube.x1y1z1.val;
+                    tetra4.yVal = cube.x1y2z1.val;
+                    tetra4.zVal = cube.x1y2z2.val;
+                    tetra4.wVal = cube.x2y2z2.val;
+                    tetras[(z + grid * y + grid * grid * x) * 6 + 3] = tetra4;
+
+                    Tetrahedra tetra5 = new Tetrahedra();
+                    tetra5.x = cube.x1y1z1.position;
+                    tetra5.y = cube.x1y2z2.position;
+                    tetra5.z = cube.x1y1z2.position;
+                    tetra5.w = cube.x2y2z2.position;
+                    tetra5.xVal = cube.x1y1z1.val;
+                    tetra5.yVal = cube.x1y2z2.val;
+                    tetra5.zVal = cube.x1y1z2.val;
+                    tetra5.wVal = cube.x2y2z2.val;
+                    tetras[(z + grid * y + grid * grid * x) * 6 + 4] = tetra5;
+
+                    Tetrahedra tetra6 = new Tetrahedra();
+                    tetra6.x = cube.x1y1z1.position;
+                    tetra6.y = cube.x1y1z2.position;
+                    tetra6.z = cube.x2y1z2.position;
+                    tetra6.w = cube.x2y2z2.position;
+                    tetra6.xVal = cube.x1y1z1.val;
+                    tetra6.yVal = cube.x1y1z2.val;
+                    tetra6.zVal = cube.x2y1z2.val;
+                    tetra6.wVal = cube.x2y2z2.val;
+                    tetras[(z + grid * y + grid * grid * x) * 6 + 5] = tetra6;
                 }
             }
         }
@@ -209,47 +282,112 @@ public class CanvasGrid : MonoBehaviour
 
         int verticesCount = 0;
 
-        //ComputeBuffer cubeBuffer = new ComputeBuffer()
-
-        for (int i = 0; i < cubes.Length; i++)
+        if (useGPU)
         {
-            Cube cube = cubes[i];
-            List<Triangle> t1 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z2, cube.x2y1z1, cube.x2y2z2);
-            List<Triangle> t2 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z1, cube.x2y2z1, cube.x2y2z2);
-            List<Triangle> t3 = MarchingTetrahedra(cube.x1y1z1, cube.x2y2z1, cube.x1y2z1, cube.x2y2z2);
-            List<Triangle> t4 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z1, cube.x1y2z2, cube.x2y2z2);
-            List<Triangle> t5 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z2, cube.x1y1z2, cube.x2y2z2);
-            List<Triangle> t6 = MarchingTetrahedra(cube.x1y1z1, cube.x1y1z2, cube.x2y1z2, cube.x2y2z2);
+            ComputeBuffer tetraBuffer = new ComputeBuffer(tetras.Length, sizeof(float) * 40 + sizeof(int));
+            tetraBuffer.SetData(tetras);
+            marchingTetrahedraShader.SetBuffer(0, "tetras", tetraBuffer);
+            marchingTetrahedraShader.SetFloat("maxVal", maxVal);
+            marchingTetrahedraShader.SetFloat("gridSize", gridSize);
+            marchingTetrahedraShader.Dispatch(0, tetras.Length / 10, 1, 1);
 
-            t1.AddRange(t2);
-            t1.AddRange(t3);
-            t1.AddRange(t4);
-            t1.AddRange(t5);
-            t1.AddRange(t6);
+            tetraBuffer.GetData(tetras);
+            tetraBuffer.Dispose();
 
-            if (t1.Count > 0)
+            for (int i = 0; i < cubes.Length; i++)
             {
-                foreach (Triangle t in t1)
+                for (int j = 0; j < 6; j++)
                 {
-                    vertices.Add(t.a);
-                    vertices.Add(t.b);
-                    vertices.Add(t.c);
-
-                    Vector3 n = Vector3.Cross(t.b - t.a, t.c - t.a);
-                    if (Vector3.Dot(n, t.n) > 0)
+                    if (tetras[i * 6 + j].t1n.magnitude > 0f)
                     {
-                        triangles.Add(verticesCount);
-                        triangles.Add(verticesCount + 1);
-                        triangles.Add(verticesCount + 2);
-                    }
-                    else
-                    {
-                        triangles.Add(verticesCount);
-                        triangles.Add(verticesCount + 2);
-                        triangles.Add(verticesCount + 1);
+                        vertices.Add(tetras[i * 6 + j].t1a);
+                        vertices.Add(tetras[i * 6 + j].t1b);
+                        vertices.Add(tetras[i * 6 + j].t1c);
+
+                        Vector3 n = Vector3.Cross(tetras[i * 6 + j].t1b - tetras[i * 6 + j].t1a, tetras[i * 6 + j].t1c - tetras[i * 6 + j].t1a);
+                        if (Vector3.Dot(n, tetras[i * 6 + j].t1n) > 0f)
+                        {
+                            triangles.Add(verticesCount);
+                            triangles.Add(verticesCount + 1);
+                            triangles.Add(verticesCount + 2);
+                        }
+                        else
+                        {
+                            triangles.Add(verticesCount);
+                            triangles.Add(verticesCount + 2);
+                            triangles.Add(verticesCount + 1);
+                        }
+
+                        verticesCount += 3;
                     }
 
-                    verticesCount += 3;
+                    if (tetras[i * 6 + j].t2n.magnitude > 0f)
+                    {
+                        vertices.Add(tetras[i * 6 + j].t2a);
+                        vertices.Add(tetras[i * 6 + j].t2b);
+                        vertices.Add(tetras[i * 6 + j].t2c);
+
+                        Vector3 n = Vector3.Cross(tetras[i * 6 + j].t2b - tetras[i * 6 + j].t2a, tetras[i * 6 + j].t2c - tetras[i * 6 + j].t2a);
+                        if (Vector3.Dot(n, tetras[i * 6 + j].t2n) > 0f)
+                        {
+                            triangles.Add(verticesCount);
+                            triangles.Add(verticesCount + 1);
+                            triangles.Add(verticesCount + 2);
+                        }
+                        else
+                        {
+                            triangles.Add(verticesCount);
+                            triangles.Add(verticesCount + 2);
+                            triangles.Add(verticesCount + 1);
+                        }
+
+                        verticesCount += 3;
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < cubes.Length; i++)
+            {
+                Cube cube = cubes[i];
+                List<Triangle> t1 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z2, cube.x2y1z1, cube.x2y2z2);
+                List<Triangle> t2 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z1, cube.x2y2z1, cube.x2y2z2);
+                List<Triangle> t3 = MarchingTetrahedra(cube.x1y1z1, cube.x2y2z1, cube.x1y2z1, cube.x2y2z2);
+                List<Triangle> t4 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z1, cube.x1y2z2, cube.x2y2z2);
+                List<Triangle> t5 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z2, cube.x1y1z2, cube.x2y2z2);
+                List<Triangle> t6 = MarchingTetrahedra(cube.x1y1z1, cube.x1y1z2, cube.x2y1z2, cube.x2y2z2);
+
+                t1.AddRange(t2);
+                t1.AddRange(t3);
+                t1.AddRange(t4);
+                t1.AddRange(t5);
+                t1.AddRange(t6);
+
+                if (t1.Count > 0)
+                {
+                    foreach (Triangle t in t1)
+                    {
+                        vertices.Add(t.a);
+                        vertices.Add(t.b);
+                        vertices.Add(t.c);
+
+                        Vector3 n = Vector3.Cross(t.b - t.a, t.c - t.a);
+                        if (Vector3.Dot(n, t.n) > 0f)
+                        {
+                            triangles.Add(verticesCount);
+                            triangles.Add(verticesCount + 1);
+                            triangles.Add(verticesCount + 2);
+                        }
+                        else
+                        {
+                            triangles.Add(verticesCount);
+                            triangles.Add(verticesCount + 2);
+                            triangles.Add(verticesCount + 1);
+                        }
+
+                        verticesCount += 3;
+                    }
                 }
             }
         }
