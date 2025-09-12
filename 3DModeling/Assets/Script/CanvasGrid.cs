@@ -12,6 +12,7 @@ public class CanvasGrid : MonoBehaviour
         public int z;
         public Vector3 position;
         public float val;
+        public List<int> xTetras, yTetras, zTetras, wTetras;
     }
 
     // the cube that will be used to compute the actual mesh, consists of 8 vertices from the grid
@@ -135,19 +136,24 @@ public class CanvasGrid : MonoBehaviour
                     info.z = z;
                     info.position = new Vector3(gridSize * (float)x, gridSize * (float)y, gridSize * (float)z);
                     info.val = 0f;
+                    info.xTetras = new List<int>();
+                    info.yTetras = new List<int>();
+                    info.zTetras = new List<int>();
+                    info.wTetras = new List<int>();
 
                     gridInfos.Add(info);
                 }
             }
         }
 
-        foreach (GridInfo info in gridInfos)
+        /*foreach (GridInfo info in gridInfos)
         {
             if (info.x > 2 && info.x < 8)
                 if (info.y > 2 && info.y < 8)
                     if (info.z > 2 && info.z < 8)
                         info.val = 1f;
-        }
+        }*/
+        //SetGrid(1, 2, 1, 1f);
     }
 
     void InitCube()
@@ -183,6 +189,10 @@ public class CanvasGrid : MonoBehaviour
                     tetra1.zVal = cube.x2y1z1.val;
                     tetra1.wVal = cube.x2y2z2.val;
                     tetras[(z + grid * y + grid * grid * x) * 6] = tetra1;
+                    cube.x1y1z1.xTetras.Add((z + grid * y + grid * grid * x) * 6);
+                    cube.x2y1z2.yTetras.Add((z + grid * y + grid * grid * x) * 6);
+                    cube.x2y1z1.zTetras.Add((z + grid * y + grid * grid * x) * 6);
+                    cube.x2y2z2.wTetras.Add((z + grid * y + grid * grid * x) * 6);
 
                     Tetrahedra tetra2 = new Tetrahedra();
                     tetra2.x = cube.x1y1z1.position;
@@ -194,6 +204,10 @@ public class CanvasGrid : MonoBehaviour
                     tetra2.zVal = cube.x2y2z1.val;
                     tetra2.wVal = cube.x2y2z2.val;
                     tetras[(z + grid * y + grid * grid * x) * 6 + 1] = tetra2;
+                    cube.x1y1z1.xTetras.Add((z + grid * y + grid * grid * x) * 6 + 1);
+                    cube.x2y1z1.yTetras.Add((z + grid * y + grid * grid * x) * 6 + 1);
+                    cube.x2y2z1.zTetras.Add((z + grid * y + grid * grid * x) * 6 + 1);
+                    cube.x2y2z2.wTetras.Add((z + grid * y + grid * grid * x) * 6 + 1);
 
                     Tetrahedra tetra3 = new Tetrahedra();
                     tetra3.x = cube.x1y1z1.position;
@@ -205,6 +219,10 @@ public class CanvasGrid : MonoBehaviour
                     tetra3.zVal = cube.x1y2z1.val;
                     tetra3.wVal = cube.x2y2z2.val;
                     tetras[(z + grid * y + grid * grid * x) * 6 + 2] = tetra3;
+                    cube.x1y1z1.xTetras.Add((z + grid * y + grid * grid * x) * 6 + 2);
+                    cube.x2y2z1.yTetras.Add((z + grid * y + grid * grid * x) * 6 + 2);
+                    cube.x1y2z1.zTetras.Add((z + grid * y + grid * grid * x) * 6 + 2);
+                    cube.x2y2z2.wTetras.Add((z + grid * y + grid * grid * x) * 6 + 2);
 
                     Tetrahedra tetra4 = new Tetrahedra();
                     tetra4.x = cube.x1y1z1.position;
@@ -216,6 +234,10 @@ public class CanvasGrid : MonoBehaviour
                     tetra4.zVal = cube.x1y2z2.val;
                     tetra4.wVal = cube.x2y2z2.val;
                     tetras[(z + grid * y + grid * grid * x) * 6 + 3] = tetra4;
+                    cube.x1y1z1.xTetras.Add((z + grid * y + grid * grid * x) * 6 + 3);
+                    cube.x1y2z1.yTetras.Add((z + grid * y + grid * grid * x) * 6 + 3);
+                    cube.x1y2z2.zTetras.Add((z + grid * y + grid * grid * x) * 6 + 3);
+                    cube.x2y2z2.wTetras.Add((z + grid * y + grid * grid * x) * 6 + 3);
 
                     Tetrahedra tetra5 = new Tetrahedra();
                     tetra5.x = cube.x1y1z1.position;
@@ -227,6 +249,10 @@ public class CanvasGrid : MonoBehaviour
                     tetra5.zVal = cube.x1y1z2.val;
                     tetra5.wVal = cube.x2y2z2.val;
                     tetras[(z + grid * y + grid * grid * x) * 6 + 4] = tetra5;
+                    cube.x1y1z1.xTetras.Add((z + grid * y + grid * grid * x) * 6 + 4);
+                    cube.x1y2z2.yTetras.Add((z + grid * y + grid * grid * x) * 6 + 4);
+                    cube.x1y1z2.zTetras.Add((z + grid * y + grid * grid * x) * 6 + 4);
+                    cube.x2y2z2.wTetras.Add((z + grid * y + grid * grid * x) * 6 + 4);
 
                     Tetrahedra tetra6 = new Tetrahedra();
                     tetra6.x = cube.x1y1z1.position;
@@ -238,6 +264,10 @@ public class CanvasGrid : MonoBehaviour
                     tetra6.zVal = cube.x2y1z2.val;
                     tetra6.wVal = cube.x2y2z2.val;
                     tetras[(z + grid * y + grid * grid * x) * 6 + 5] = tetra6;
+                    cube.x1y1z1.xTetras.Add((z + grid * y + grid * grid * x) * 6 + 5);
+                    cube.x1y1z2.yTetras.Add((z + grid * y + grid * grid * x) * 6 + 5);
+                    cube.x2y1z2.zTetras.Add((z + grid * y + grid * grid * x) * 6 + 5);
+                    cube.x2y2z2.wTetras.Add((z + grid * y + grid * grid * x) * 6 + 5);
                 }
             }
         }
@@ -600,20 +630,21 @@ public class CanvasGrid : MonoBehaviour
     public void SetGrid(int x, int y, int z, float val)
     {
         GridInfo gridInfo = FindGrid(x, y, z);
-        if (gridInfo != null) gridInfo.val = val;
+        gridInfo.val = val;
+
+        foreach (int i in gridInfo.xTetras)
+            tetras[i].xVal = val;
+        foreach (int i in gridInfo.yTetras)
+            tetras[i].yVal = val;
+        foreach (int i in gridInfo.zTetras)
+            tetras[i].zVal = val;
+        foreach (int i in gridInfo.wTetras)
+            tetras[i].wVal = val;
     }
 
     // Helper function to locate a grid vertex
     public GridInfo FindGrid(int x, int y, int z)
     {
-        foreach (GridInfo gridInfo in gridInfos)
-        {
-            if ((gridInfo.x == x && gridInfo.y == y) && gridInfo.z == z)
-            {
-                return gridInfo;
-            }
-        }
-
-        return null;
+        return gridInfos[z + (grid + 1) * y + (grid + 1) * (grid + 1) * x];
     }
 }

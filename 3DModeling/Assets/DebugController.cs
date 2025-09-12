@@ -15,8 +15,11 @@ public class DebugController : MonoBehaviour
     IEnumerator AddPointCloud()
     {
         yield return new WaitForSeconds(1f);
-        if (grid)
-            grid.UpdateMesh();
+        for (int x = 0; x < grid.grid; x++)
+            for (int y = 0; y < grid.grid; y++)
+                for (int z = 0; z < grid.grid; z++)
+                    grid.SetGrid(x, y, z, Mathf.Max(0, Perlin.Noise((float)x / (float)grid.grid * 2f, (float)y / (float)grid.grid * 2f, (float)z / (float)grid.grid * 2f)) / 3f);
+        grid.UpdateMesh();
     }
 
     // Update is called once per frame
