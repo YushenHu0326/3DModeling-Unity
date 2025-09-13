@@ -1,6 +1,11 @@
 # Self-written 3D Data Reconstruction by Marching Tetrahedra
 A side project that works on reconstructing 3D meshes from spatial data. Hopefully it can be used in many future works.
 
+
+<img width="913" height="394" alt="1" src="https://github.com/user-attachments/assets/fdbf249e-8582-42d2-a83f-af2bc0e751ce" />
+<img width="729" height="395" alt="2" src="https://github.com/user-attachments/assets/72051a34-0927-4f80-8ae3-32a98810e9e4" />
+
+
 ## Features
 - GPU and CPU mode. GPU is obliviously faster but will have some weird bugs when the grid size is really small.
 - Easy to use interface.
