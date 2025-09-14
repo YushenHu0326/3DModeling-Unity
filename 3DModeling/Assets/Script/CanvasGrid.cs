@@ -74,7 +74,7 @@ public class CanvasGrid : MonoBehaviour
 
     public bool useGPU;
 
-    public List<GridInfo> gridInfos;
+    public GridInfo[] gridInfos;
 
     Cube[] cubes;
     Tetrahedra[] tetras;
@@ -122,7 +122,7 @@ public class CanvasGrid : MonoBehaviour
     void InitGrid()
     {
         gridSize = canvasSize / (float)grid;
-        gridInfos = new List<GridInfo>();
+        gridInfos = new GridInfo[(grid + 1) * (grid + 1) * (grid + 1)];
 
         for (int x = 0; x <= grid; x++)
         {
@@ -141,7 +141,7 @@ public class CanvasGrid : MonoBehaviour
                     info.zTetras = new List<int>();
                     info.wTetras = new List<int>();
 
-                    gridInfos.Add(info);
+                    gridInfos[z + y * (grid + 1) + x * (grid + 1) * (grid + 1)] = info;
                 }
             }
         }
@@ -495,7 +495,7 @@ public class CanvasGrid : MonoBehaviour
             Triangle triangle = new Triangle();
             triangle.a = x.position + (w.position - x.position) * ((surfaceVal - x.val) / (w.val - x.val));
             triangle.b = y.position + (w.position - y.position) * ((surfaceVal - y.val) / (w.val - y.val));
-            triangle.c = z.position + (w.position - z.position) * ((surfaceVal - w.val) / (w.val - x.val));
+            triangle.c = z.position + (w.position - z.position) * ((surfaceVal - z.val) / (w.val - z.val));
             triangle.n = w.position - y.position;
             triangles.Add(triangle);
         }

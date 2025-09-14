@@ -25,8 +25,7 @@ struct Tetrahedra
 };
 
 RWStructuredBuffer<Tetrahedra> tetras;
-float maxVal;
-float gridSize;
+float surfaceVal;
 
 [numthreads(10,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -35,145 +34,145 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     Tetrahedra tetra = tetras[id.x];
 
-    if (tetra.xVal == 0 && tetra.yVal * tetra.zVal * tetra.wVal != 0)
+    if (tetra.xVal < surfaceVal && tetra.yVal > surfaceVal && tetra.zVal > surfaceVal && tetra.wVal > surfaceVal)
     {
-        tetra.t1a = tetra.y + normalize(tetra.x - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.z + normalize(tetra.x - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.x - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.y + (tetra.x - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.xVal - tetra.yVal));
+        tetra.t1b = tetra.z + (tetra.x - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.xVal - tetra.zVal));
+        tetra.t1c = tetra.w + (tetra.x - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.xVal - tetra.wVal));
         tetra.t1n = tetra.x - tetra.y;
     }
 
-    if (tetra.xVal != 0 && tetra.yVal + tetra.zVal + tetra.wVal == 0)
+    if (tetra.xVal > surfaceVal && tetra.yVal < surfaceVal && tetra.zVal < surfaceVal && tetra.wVal < surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.y - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.x + normalize(tetra.z - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.x + normalize(tetra.w - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.y - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.yVal - tetra.xVal));
+        tetra.t1b = tetra.x + (tetra.z - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.zVal - tetra.xVal));
+        tetra.t1c = tetra.x + (tetra.w - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.wVal - tetra.xVal));
         tetra.t1n = tetra.y - tetra.x;
     }
 
-    if (tetra.yVal == 0 && tetra.xVal * tetra.zVal * tetra.wVal != 0)
+    if (tetra.yVal < surfaceVal && tetra.xVal > surfaceVal && tetra.zVal > surfaceVal && tetra.wVal > surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.y - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.z + normalize(tetra.y - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.y - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.y - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.yVal - tetra.xVal));
+        tetra.t1b = tetra.z + (tetra.y - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.yVal - tetra.zVal));
+        tetra.t1c = tetra.w + (tetra.y - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.yVal - tetra.wVal));
         tetra.t1n = tetra.y - tetra.x;
     }
 
-    if (tetra.yVal != 0 && tetra.xVal + tetra.zVal + tetra.wVal == 0)
+    if (tetra.yVal > surfaceVal && tetra.xVal < surfaceVal && tetra.zVal < surfaceVal && tetra.wVal < surfaceVal)
     {
-        tetra.t1a = tetra.y + normalize(tetra.x - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.y + normalize(tetra.z - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.y + normalize(tetra.w - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.y + (tetra.x - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.xVal - tetra.yVal));
+        tetra.t1b = tetra.y + (tetra.z - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.zVal - tetra.yVal));
+        tetra.t1c = tetra.y + (tetra.w - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.wVal - tetra.yVal));
         tetra.t1n = tetra.x - tetra.y;
     }
 
-    if (tetra.zVal == 0 && tetra.yVal * tetra.xVal * tetra.wVal != 0)
+    if (tetra.zVal < surfaceVal && tetra.xVal > surfaceVal && tetra.yVal > surfaceVal && tetra.wVal > surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.z - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.y + normalize(tetra.z - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.z - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.z - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.zVal - tetra.xVal));
+        tetra.t1b = tetra.y + (tetra.z - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.zVal - tetra.yVal));
+        tetra.t1c = tetra.w + (tetra.z - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.zVal - tetra.wVal));
         tetra.t1n = tetra.z - tetra.y;
     }
 
-    if (tetra.zVal != 0 && tetra.yVal + tetra.xVal + tetra.wVal == 0)
+    if (tetra.zVal > surfaceVal && tetra.xVal < surfaceVal && tetra.yVal < surfaceVal && tetra.wVal < surfaceVal)
     {
-        tetra.t1a = tetra.z + normalize(tetra.x - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.z + normalize(tetra.y - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.z + normalize(tetra.w - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.z + (tetra.x - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.xVal - tetra.zVal));
+        tetra.t1b = tetra.z + (tetra.y - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.yVal - tetra.zVal));
+        tetra.t1c = tetra.z + (tetra.w - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.wVal - tetra.zVal));
         tetra.t1n = tetra.y - tetra.z;
     }
 
-    if (tetra.wVal == 0 && tetra.yVal * tetra.zVal * tetra.xVal != 0)
+    if (tetra.wVal < surfaceVal && tetra.xVal > surfaceVal && tetra.yVal > surfaceVal && tetra.zVal > surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.w - tetra.x) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.y + normalize(tetra.w - tetra.y) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.z + normalize(tetra.w - tetra.z) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.w - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.wVal - tetra.xVal));
+        tetra.t1b = tetra.y + (tetra.w - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.wVal - tetra.yVal));
+        tetra.t1c = tetra.z + (tetra.w - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.wVal - tetra.zVal));
         tetra.t1n = tetra.w - tetra.y;
     }
 
-    if (tetra.wVal != 0 && tetra.yVal + tetra.zVal + tetra.xVal == 0)
+    if (tetra.wVal > surfaceVal && tetra.xVal < surfaceVal && tetra.yVal < surfaceVal && tetra.zVal < surfaceVal)
     {
-        tetra.t1a = tetra.w + normalize(tetra.x - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.w + normalize(tetra.y - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.z - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.w + (tetra.x - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.xVal - tetra.wVal));
+        tetra.t1b = tetra.w + (tetra.y - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.yVal - tetra.wVal));
+        tetra.t1c = tetra.w + (tetra.z - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.zVal - tetra.wVal));
         tetra.t1n = tetra.y - tetra.w;
     }
 
-    if (tetra.xVal + tetra.yVal == 0 && tetra.zVal * tetra.wVal != 0)
+    if (tetra.xVal < surfaceVal && tetra.yVal < surfaceVal && tetra.zVal > surfaceVal && tetra.wVal > surfaceVal)
     {
-        tetra.t1a = tetra.z + normalize(tetra.x - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.w + normalize(tetra.x - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.y - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.z + (tetra.x - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.xVal - tetra.zVal));
+        tetra.t1b = tetra.w + (tetra.x - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.xVal - tetra.wVal));
+        tetra.t1c = tetra.w + (tetra.y - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.yVal - tetra.wVal));
         tetra.t1n = tetra.x - tetra.z;
 
-        tetra.t2a = tetra.z + normalize(tetra.y - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2b = tetra.w + normalize(tetra.y - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2c = tetra.z + normalize(tetra.x - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t2a = tetra.z + (tetra.y - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.yVal - tetra.zVal));
+        tetra.t2b = tetra.w + (tetra.y - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.yVal - tetra.wVal));
+        tetra.t2c = tetra.z + (tetra.x - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.xVal - tetra.zVal));
         tetra.t2n = tetra.x - tetra.z;
     }
 
-    if (tetra.xVal * tetra.yVal != 0 && tetra.zVal + tetra.wVal == 0)
+    if (tetra.xVal > surfaceVal && tetra.yVal > surfaceVal && tetra.zVal < surfaceVal && tetra.wVal < surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.z - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.x + normalize(tetra.w - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.y + normalize(tetra.w - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.z - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.zVal - tetra.xVal));
+        tetra.t1b = tetra.x + (tetra.w - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.wVal - tetra.xVal));
+        tetra.t1c = tetra.y + (tetra.w - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.wVal - tetra.yVal));
         tetra.t1n = tetra.z - tetra.x;
 
-        tetra.t2a = tetra.y + normalize(tetra.z - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2b = tetra.y + normalize(tetra.w - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2c = tetra.x + normalize(tetra.z - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t2a = tetra.y + (tetra.z - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.zVal - tetra.yVal));
+        tetra.t2b = tetra.y + (tetra.w - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.wVal - tetra.yVal));
+        tetra.t2c = tetra.x + (tetra.z - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.zVal - tetra.xVal));
         tetra.t2n = tetra.z - tetra.x;
     }
 
-    if (tetra.xVal + tetra.zVal == 0 && tetra.yVal * tetra.wVal != 0)
+    if (tetra.xVal < surfaceVal && tetra.zVal < surfaceVal && tetra.yVal > surfaceVal && tetra.wVal > surfaceVal)
     {
-        tetra.t1a = tetra.y + normalize(tetra.x - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.w + normalize(tetra.x - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.z - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.y + (tetra.x - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.xVal - tetra.yVal));
+        tetra.t1b = tetra.w + (tetra.x - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.xVal - tetra.wVal));
+        tetra.t1c = tetra.w + (tetra.z - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.zVal - tetra.wVal));
         tetra.t1n = tetra.x - tetra.y;
 
-        tetra.t2a = tetra.y + normalize(tetra.z - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2b = tetra.w + normalize(tetra.z - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2c = tetra.y + normalize(tetra.x - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t2a = tetra.y + (tetra.z - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.zVal - tetra.yVal));
+        tetra.t2b = tetra.w + (tetra.z - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.zVal - tetra.wVal));
+        tetra.t2c = tetra.y + (tetra.x - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.xVal - tetra.yVal));
         tetra.t2n = tetra.x - tetra.y;
     }
 
-    if (tetra.xVal * tetra.zVal != 0 && tetra.yVal + tetra.wVal == 0)
+    if (tetra.xVal > surfaceVal && tetra.zVal > surfaceVal && tetra.yVal < surfaceVal && tetra.wVal < surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.y - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.x + normalize(tetra.w - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.z + normalize(tetra.w - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.y - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.yVal - tetra.xVal));
+        tetra.t1b = tetra.x + (tetra.w - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.wVal - tetra.xVal));
+        tetra.t1c = tetra.z + (tetra.w - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.wVal - tetra.zVal));
         tetra.t1n = tetra.y - tetra.x;
 
-        tetra.t2a = tetra.z + normalize(tetra.y - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2b = tetra.z + normalize(tetra.w - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2c = tetra.x + normalize(tetra.y - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t2a = tetra.z + (tetra.y - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.yVal - tetra.zVal));
+        tetra.t2b = tetra.z + (tetra.w - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.wVal - tetra.zVal));
+        tetra.t2c = tetra.x + (tetra.y - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.yVal - tetra.xVal));
         tetra.t2n = tetra.y - tetra.x;
     }
 
-    if (tetra.xVal + tetra.wVal == 0 && tetra.zVal * tetra.yVal != 0)
+    if (tetra.xVal < surfaceVal && tetra.wVal < surfaceVal && tetra.yVal > surfaceVal && tetra.zVal > surfaceVal)
     {
-        tetra.t1a = tetra.z + normalize(tetra.x - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.y + normalize(tetra.x - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.y + normalize(tetra.w - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.z + (tetra.x - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.xVal - tetra.zVal));
+        tetra.t1b = tetra.y + (tetra.x - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.xVal - tetra.yVal));
+        tetra.t1c = tetra.y + (tetra.w - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.wVal - tetra.yVal));
         tetra.t1n = tetra.x - tetra.z;
 
-        tetra.t2a = tetra.z + normalize(tetra.w - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2b = tetra.y + normalize(tetra.w - tetra.y) * clamp(tetra.yVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2c = tetra.z + normalize(tetra.x - tetra.z) * clamp(tetra.zVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t2a = tetra.z + (tetra.w - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.wVal - tetra.zVal));
+        tetra.t2b = tetra.y + (tetra.w - tetra.y) * ((surfaceVal - tetra.yVal) / (tetra.wVal - tetra.yVal));
+        tetra.t2c = tetra.z + (tetra.x - tetra.z) * ((surfaceVal - tetra.zVal) / (tetra.xVal - tetra.zVal));
         tetra.t2n = tetra.x - tetra.z;
     }
 
-    if (tetra.xVal * tetra.wVal != 0 && tetra.zVal + tetra.yVal == 0)
+    if (tetra.xVal > surfaceVal && tetra.wVal > surfaceVal && tetra.yVal < surfaceVal && tetra.zVal < surfaceVal)
     {
-        tetra.t1a = tetra.x + normalize(tetra.z - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1b = tetra.x + normalize(tetra.y - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t1c = tetra.w + normalize(tetra.z - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t1a = tetra.x + (tetra.z - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.zVal - tetra.xVal));
+        tetra.t1b = tetra.x + (tetra.y - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.yVal - tetra.xVal));
+        tetra.t1c = tetra.w + (tetra.z - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.zVal - tetra.wVal));
         tetra.t1n = tetra.z - tetra.x;
 
-        tetra.t2a = tetra.w + normalize(tetra.z - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2b = tetra.w + normalize(tetra.y - tetra.w) * clamp(tetra.wVal / maxVal * gridSize / 2, 0, gridSize / 2);
-        tetra.t2c = tetra.x + normalize(tetra.y - tetra.x) * clamp(tetra.xVal / maxVal * gridSize / 2, 0, gridSize / 2);
+        tetra.t2a = tetra.w + (tetra.z - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.zVal - tetra.wVal));
+        tetra.t2b = tetra.w + (tetra.y - tetra.w) * ((surfaceVal - tetra.wVal) / (tetra.yVal - tetra.wVal));
+        tetra.t2c = tetra.x + (tetra.y - tetra.x) * ((surfaceVal - tetra.xVal) / (tetra.yVal - tetra.xVal));
         tetra.t2n = tetra.z - tetra.x;
     }
     
