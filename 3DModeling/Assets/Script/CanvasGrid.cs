@@ -109,9 +109,9 @@ public class CanvasGrid : MonoBehaviour
             triangles = newTriangles
         };
 
-        filter.mesh = mesh;
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
-        UpdateMesh();
+        filter.mesh = mesh;
     }
 
     void Update()
@@ -303,15 +303,15 @@ public class CanvasGrid : MonoBehaviour
 
         if (cubes == null) return;
 
-        mesh.Clear();
-
-        List<Vector3> vertices = new List<Vector3>();
-        List<int> triangles = new List<int>();
-
-        int verticesCount = 0;
-
         if (useGPU)
         {
+            mesh.Clear(false);
+
+            int verticesCount = 0;
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+
             ComputeBuffer tetraBuffer = new ComputeBuffer(tetras.Length, sizeof(float) * 40);
             tetraBuffer.SetData(tetras);
             marchingTetrahedraShader.SetBuffer(0, "tetras", tetraBuffer);
@@ -373,50 +373,75 @@ public class CanvasGrid : MonoBehaviour
                     }
                 }
             }
+
+            mesh.vertices = vertices.ToArray();
+            mesh.triangles = triangles.ToArray();
+
+            mesh.RecalculateNormals();
         }
         else
         {
-            for (int i = 0; i < cubes.Length; i++)
+            StartCoroutine(ReconstructMesh());
+        }
+    }
+
+    IEnumerator ReconstructMesh()
+    {
+        mesh.Clear(false);
+
+        int verticesCount = 0;
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
+        for (int i = 0; i < cubes.Length; i++)
+        {
+            Cube cube = cubes[i];
+            List<Triangle> t1 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z2, cube.x2y1z1, cube.x2y2z2);
+            List<Triangle> t2 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z1, cube.x2y2z1, cube.x2y2z2);
+            List<Triangle> t3 = MarchingTetrahedra(cube.x1y1z1, cube.x2y2z1, cube.x1y2z1, cube.x2y2z2);
+            List<Triangle> t4 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z1, cube.x1y2z2, cube.x2y2z2);
+            List<Triangle> t5 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z2, cube.x1y1z2, cube.x2y2z2);
+            List<Triangle> t6 = MarchingTetrahedra(cube.x1y1z1, cube.x1y1z2, cube.x2y1z2, cube.x2y2z2);
+
+            t1.AddRange(t2);
+            t1.AddRange(t3);
+            t1.AddRange(t4);
+            t1.AddRange(t5);
+            t1.AddRange(t6);
+
+            if (t1.Count > 0)
             {
-                Cube cube = cubes[i];
-                List<Triangle> t1 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z2, cube.x2y1z1, cube.x2y2z2);
-                List<Triangle> t2 = MarchingTetrahedra(cube.x1y1z1, cube.x2y1z1, cube.x2y2z1, cube.x2y2z2);
-                List<Triangle> t3 = MarchingTetrahedra(cube.x1y1z1, cube.x2y2z1, cube.x1y2z1, cube.x2y2z2);
-                List<Triangle> t4 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z1, cube.x1y2z2, cube.x2y2z2);
-                List<Triangle> t5 = MarchingTetrahedra(cube.x1y1z1, cube.x1y2z2, cube.x1y1z2, cube.x2y2z2);
-                List<Triangle> t6 = MarchingTetrahedra(cube.x1y1z1, cube.x1y1z2, cube.x2y1z2, cube.x2y2z2);
-
-                t1.AddRange(t2);
-                t1.AddRange(t3);
-                t1.AddRange(t4);
-                t1.AddRange(t5);
-                t1.AddRange(t6);
-
-                if (t1.Count > 0)
+                foreach (Triangle t in t1)
                 {
-                    foreach (Triangle t in t1)
+                    vertices.Add(t.a);
+                    vertices.Add(t.b);
+                    vertices.Add(t.c);
+
+                    Vector3 n = Vector3.Cross(t.b - t.a, t.c - t.a);
+                    if (Vector3.Dot(n, t.n) > 0f)
                     {
-                        vertices.Add(t.a);
-                        vertices.Add(t.b);
-                        vertices.Add(t.c);
-
-                        Vector3 n = Vector3.Cross(t.b - t.a, t.c - t.a);
-                        if (Vector3.Dot(n, t.n) > 0f)
-                        {
-                            triangles.Add(verticesCount);
-                            triangles.Add(verticesCount + 1);
-                            triangles.Add(verticesCount + 2);
-                        }
-                        else
-                        {
-                            triangles.Add(verticesCount);
-                            triangles.Add(verticesCount + 2);
-                            triangles.Add(verticesCount + 1);
-                        }
-
-                        verticesCount += 3;
+                        triangles.Add(verticesCount);
+                        triangles.Add(verticesCount + 1);
+                        triangles.Add(verticesCount + 2);
                     }
+                    else
+                    {
+                        triangles.Add(verticesCount);
+                        triangles.Add(verticesCount + 2);
+                        triangles.Add(verticesCount + 1);
+                    }
+
+                    verticesCount += 3;
                 }
+            }
+            if (i % 100 == 0)
+            {
+                yield return new WaitForFixedUpdate();
+
+                mesh.vertices = vertices.ToArray();
+                mesh.triangles = triangles.ToArray();
+
+                mesh.RecalculateNormals();
             }
         }
 
@@ -612,7 +637,7 @@ public class CanvasGrid : MonoBehaviour
 
             triangle1.a = x.position + (z.position - x.position) * ((surfaceVal - x.val) / (z.val - x.val));
             triangle1.b = x.position + (y.position - x.position) * ((surfaceVal - x.val) / (y.val - x.val));
-            triangle1.c = w.position + (z.position - w.position) * ((surfaceVal - z.val) / (z.val - w.val));
+            triangle1.c = w.position + (z.position - w.position) * ((surfaceVal - w.val) / (z.val - w.val));
             triangle1.n = z.position - x.position;
 
             triangle2.a = w.position + (z.position - w.position) * ((surfaceVal - w.val) / (z.val - w.val));
