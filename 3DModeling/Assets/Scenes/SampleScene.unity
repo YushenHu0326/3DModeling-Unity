@@ -504,9 +504,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvasSize: 2
-  grid: 20
+  grid: 100
   surfaceVal: 0.2
-  useGPU: 1
+  useGPU: 0
   marchingTetrahedraShader: {fileID: 7200000, guid: 2f0f4b0f1b0d5914d88e10153a5a6c1c, type: 3}
 --- !u!4 &993859533
 Transform:

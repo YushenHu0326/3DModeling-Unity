@@ -83,6 +83,8 @@ public class CanvasGrid : MonoBehaviour
     MeshRenderer meshRenderer;
     Mesh mesh;
 
+    bool reconstructing;
+
     public ComputeShader marchingTetrahedraShader;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -273,35 +275,13 @@ public class CanvasGrid : MonoBehaviour
         }
     }
 
-    public void UpdatePointCloud(PointCloud pointCloud)
-    {
-        foreach (Vector3 point in pointCloud.points)
-        {
-            Vector3 relPos = point - gameObject.transform.position;
-            if ((relPos.x < canvasSize && relPos.y < canvasSize) && relPos.z < canvasSize)
-            {
-                int x = (int)Mathf.Floor(relPos.x / canvasSize * (float)grid);
-                int y = (int)Mathf.Floor(relPos.y / canvasSize * (float)grid);
-                int z = (int)Mathf.Floor(relPos.z / canvasSize * (float)grid);
-
-                Cube cube = cubes[z + y * grid + x * grid * grid];
-                cube.x1y1z1.val += Mathf.Max(gridSize - Vector3.Distance(cube.x1y1z1.position, relPos), 0f) * pointCloud.val;
-                cube.x2y1z1.val += Mathf.Max(gridSize - Vector3.Distance(cube.x2y1z1.position, relPos), 0f) * pointCloud.val;
-                cube.x1y2z1.val += Mathf.Max(gridSize - Vector3.Distance(cube.x1y2z1.position, relPos), 0f) * pointCloud.val;
-                cube.x2y2z1.val += Mathf.Max(gridSize - Vector3.Distance(cube.x2y2z1.position, relPos), 0f) * pointCloud.val;
-                cube.x1y1z2.val += Mathf.Max(gridSize - Vector3.Distance(cube.x1y1z2.position, relPos), 0f) * pointCloud.val;
-                cube.x2y1z2.val += Mathf.Max(gridSize - Vector3.Distance(cube.x2y1z2.position, relPos), 0f) * pointCloud.val;
-                cube.x1y2z2.val += Mathf.Max(gridSize - Vector3.Distance(cube.x1y2z2.position, relPos), 0f) * pointCloud.val;
-                cube.x2y2z2.val += Mathf.Max(gridSize - Vector3.Distance(cube.x2y2z2.position, relPos), 0f) * pointCloud.val;
-            }
-        }
-    }
-
     public void UpdateMesh()
     {
         if (mesh == null) return;
 
         if (cubes == null) return;
+
+        if (reconstructing) return;
 
         if (useGPU)
         {
@@ -381,13 +361,15 @@ public class CanvasGrid : MonoBehaviour
         }
         else
         {
-            StartCoroutine(ReconstructMesh());
+            StartCoroutine(ReconstructMeshCPU());
         }
     }
 
-    IEnumerator ReconstructMesh()
+    IEnumerator ReconstructMeshCPU()
     {
         mesh.Clear(false);
+
+        reconstructing = true;
 
         int verticesCount = 0;
 
@@ -434,7 +416,7 @@ public class CanvasGrid : MonoBehaviour
                     verticesCount += 3;
                 }
             }
-            if (i % 100 == 0)
+            if (i % (cubes.Length / 500) == 0)
             {
                 yield return new WaitForFixedUpdate();
 
@@ -449,6 +431,8 @@ public class CanvasGrid : MonoBehaviour
         mesh.triangles = triangles.ToArray();
 
         mesh.RecalculateNormals();
+
+        reconstructing = false;
     }
 
     List<Triangle> MarchingTetrahedra(GridInfo x, GridInfo y, GridInfo z, GridInfo w)
