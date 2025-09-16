@@ -60,6 +60,8 @@ public class CanvasGrid : MonoBehaviour
         public Vector3 n;
     }
 
+    public int xIndex, yIndex, zIndex;
+
     // the size of the grid canvas
     public float canvasSize = 100f;
 
@@ -85,6 +87,10 @@ public class CanvasGrid : MonoBehaviour
 
     bool reconstructing;
 
+    public int totalGridNum = 1;
+
+    public Material mat;
+
     public ComputeShader marchingTetrahedraShader;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -99,6 +105,7 @@ public class CanvasGrid : MonoBehaviour
 
         meshRenderer = gameObject.GetComponent<MeshRenderer>();
         if (meshRenderer == null) meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        meshRenderer.materials[0] = mat;
 
         Vector3[] newVertices = new Vector3[0];
         Vector2[] newUVs = new Vector2[0];
@@ -416,7 +423,7 @@ public class CanvasGrid : MonoBehaviour
                     verticesCount += 3;
                 }
             }
-            if (i % (cubes.Length / 500) == 0)
+            if (i % (int)Mathf.Ceil(100f / (float)totalGridNum) == 0)
             {
                 yield return new WaitForFixedUpdate();
 
