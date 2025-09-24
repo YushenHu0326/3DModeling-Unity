@@ -49,7 +49,18 @@ public class CanvasSpace : MonoBehaviour
             }
         }
 
-        StartCoroutine(Test());
+        //StartCoroutine(Test());
+    }
+
+    public float GetGrid(int x, int y, int z, int i, int j, int k)
+    {
+        return canvasGrids[z + y * zNum + x * yNum * zNum].GetGrid(i, j, k);
+    }
+
+    public Vector3 GetGridPosition(int x, int y, int z, int i, int j, int k)
+    {
+        Vector3 gridPosition = canvasGrids[z + y * zNum + x * yNum * zNum].gameObject.transform.position;
+        return gridPosition + new Vector3((float)i * gridSize / (float)gridDivisions, (float)j * gridSize / (float)gridDivisions, (float)k * gridSize / (float)gridDivisions);
     }
 
     IEnumerator Test()
@@ -68,7 +79,7 @@ public class CanvasSpace : MonoBehaviour
                         {
                             for (int k = 0; k < gridDivisions + 1; k++)
                             {
-                                canvasGrids[z + y * zNum + x * zNum * yNum].SetGrid(i, j, k, Mathf.Max(0f, Perlin.Noise((float)(i + x * gridDivisions) / 5f, (float)(j + y * gridDivisions) / 5f, (float)(k + z * gridDivisions) / 5f)));
+                                canvasGrids[z + y * zNum + x * zNum * yNum].SetGrid(i, j, k, Mathf.Max(0f, Perlin.Noise((float)(i + x * gridDivisions) / 20f, (float)(j + y * gridDivisions) / 20f, (float)(k + z * gridDivisions) / 20f)));
                             }
                         }
                     }

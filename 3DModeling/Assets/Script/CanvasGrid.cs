@@ -658,6 +658,12 @@ public class CanvasGrid : MonoBehaviour
             tetras[i].wVal = val;
     }
 
+    public float GetGrid(int x, int y, int z)
+    {
+        GridInfo gridInfo = FindGrid(x, y, z);
+        return gridInfo.val;
+    }
+
     // Helper function to locate a grid vertex
     public GridInfo FindGrid(int x, int y, int z)
     {
