@@ -56,33 +56,11 @@ public class CanvasSpace : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        for (int x = 0; x < xNum; x++)
-        {
-            for (int y = 0; y < yNum; y++)
-            {
-                for (int z = 0; z < zNum; z++)
-                {
-                    for (int i = 0; i < gridDivisions + 1; i++)
-                    {
-                        for (int j = 0; j < gridDivisions + 1; j++)
-                        {
-                            for (int k = 0; k < gridDivisions + 1; k++)
-                            {
-                                canvasGrids[z + y * zNum + x * zNum * yNum].SetGrid(i, j, k, Mathf.Max(0f, Perlin.Noise((float)(i + x * gridDivisions) / 5f, (float)(j + y * gridDivisions) / 5f, (float)(k + z * gridDivisions) / 5f)));
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
-        for (int x = 0; x < xNum; x++)
-        {
-            for (int y = 0; y < yNum; y++)
-            {
-                for (int z = 0; z < zNum; z++)
-                    canvasGrids[z + y * zNum + x * zNum * yNum].UpdateMesh();
-            }
-        }
+    }
+
+    public CanvasGrid GetCanvasGrid(int id)
+    {
+        return canvasGrids[id];
     }
 }

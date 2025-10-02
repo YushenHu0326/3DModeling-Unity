@@ -423,7 +423,7 @@ public class CanvasGrid : MonoBehaviour
                     verticesCount += 3;
                 }
             }
-            if (i % (int)Mathf.Ceil(100f / (float)totalGridNum) == 0)
+            if (i % (int)Mathf.Ceil(1000f / (float)totalGridNum) == 0)
             {
                 yield return new WaitForFixedUpdate();
 
